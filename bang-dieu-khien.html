@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bảng điều khiển</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --panel: #1A1D1B;
+    --card: #232A25;
+    --card-hi: #2B332D;
+    --bezel: #3C463F;
+    --text: #E9EDE7;
+    --text-dim: #8B9A8E;
+    --led-green: #5FBF77;
+    --led-amber: #E3A33D;
+    --led-red: #D9534F;
+    --copper: #B87A4A;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background: var(--panel);
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 24px 24px;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 28px 16px 60px;
+    min-height: 100vh;
+  }
+  .wrap{ max-width: 560px; margin: 0 auto; }
+
+  header{ margin-bottom: 30px; }
+  .eyebrow{
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--copper);
+    display:flex; align-items:center; gap:8px;
+    margin-bottom: 8px;
+  }
+  .eyebrow::before{
+    content:""; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--led-green);
+    box-shadow: 0 0 6px 1px var(--led-green);
+  }
+  h1{
+    font-family:'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: clamp(26px, 7vw, 32px);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .sub{
+    margin-top: 8px;
+    color: var(--text-dim);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .panel-card{
+    background: var(--card);
+    border: 1px solid var(--bezel);
+    border-radius: 6px;
+    padding: 18px;
+    margin-bottom: 18px;
+    position: relative;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 4px 14px rgba(0,0,0,0.25);
+  }
+  .panel-card::before{
+    content:"";
+    position:absolute; top:10px; left:10px; right:10px; bottom:10px;
+    border: 1px dashed rgba(255,255,255,0.05);
+    border-radius: 3px;
+    pointer-events:none;
+  }
+
+  .card-top{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    margin-bottom: 16px;
+  }
+  .card-id{
+    display:flex; align-items:center; gap:10px;
+  }
+  .icon-box{
+    width: 40px; height: 40px;
+    border-radius: 5px;
+    background: var(--card-hi);
+    border: 1px solid var(--bezel);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 19px;
+    flex-shrink:0;
+  }
+  .card-title{
+    font-family:'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 15.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+  }
+  .card-desc{
+    font-size: 11.5px;
+    color: var(--text-dim);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  .led{
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #444;
+    flex-shrink: 0;
+    margin-top: 5px;
+    transition: all .2s ease;
+  }
+  .led.idle{ background: #4A544D; }
+  .led.running{
+    background: var(--led-amber);
+    box-shadow: 0 0 8px 2px var(--led-amber);
+    animation: pulse 0.9s ease-in-out infinite;
+  }
+  .led.ok{ background: var(--led-green); box-shadow: 0 0 8px 2px var(--led-green); }
+  @keyframes pulse{ 50%{ opacity: 0.35; } }
+
+  .readout{
+    background: #10130F;
+    border: 1px solid var(--bezel);
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--led-green);
+    min-height: 40px;
+    margin-bottom: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .readout .dim{ color: var(--text-dim); }
+  .readout .cursor{
+    display:inline-block; width:6px; height:12px;
+    background: var(--led-green);
+    vertical-align: middle;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  .run-btn{
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(180deg, var(--card-hi), var(--card));
+    border: 1px solid var(--bezel);
+    border-radius: 5px;
+    color: var(--text);
+    font-family:'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    transition: all .1s ease;
+  }
+  .run-btn:hover{ border-color: var(--copper); }
+  .run-btn:active{ transform: translateY(1px); }
+  .run-btn:disabled{ opacity: 0.5; cursor: not-allowed; }
+  .run-btn .bolt{ color: var(--copper); }
+
+  /* expand toggle for cards with sub-actions */
+  .expand-toggle{
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    border: 1px dashed var(--bezel);
+    border-radius: 5px;
+    color: var(--text-dim);
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    margin-top: 10px;
+    transition: all .15s ease;
+  }
+  .expand-toggle:hover{ color: var(--text); border-color: var(--copper); }
+  .expand-toggle .chevron{ transition: transform .2s ease; display:inline-block; }
+  .expand-toggle.open .chevron{ transform: rotate(180deg); }
+
+  .sub-panel{
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .25s ease;
+  }
+  .sub-panel.open{ max-height: 600px; }
+  .sub-list{
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--bezel);
+    display:flex; flex-direction:column; gap: 10px;
+  }
+  .sub-row{
+    display:flex; align-items:center; gap: 10px;
+    background: rgba(0,0,0,0.15);
+    border: 1px solid var(--bezel);
+    border-radius: 4px;
+    padding: 9px 10px;
+  }
+  .sub-row .led{ margin-top:0; width:8px; height:8px; }
+  .sub-info{ flex:1; min-width:0; }
+  .sub-title{ font-size: 12px; color: var(--text); }
+  .sub-desc{ font-size: 10.5px; color: var(--text-dim); margin-top: 1px; }
+  .sub-run{
+    flex-shrink: 0;
+    padding: 6px 10px;
+    background: var(--card-hi);
+    border: 1px solid var(--bezel);
+    border-radius: 4px;
+    color: var(--text);
+    font-family:'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+  }
+  .sub-run:hover{ border-color: var(--copper); }
+  .sub-run:disabled{ opacity:0.5; cursor:not-allowed; }
+
+  .note{
+    margin-top: 36px;
+    padding-top: 16px;
+    border-top: 1px solid var(--bezel);
+    font-size: 11.5px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .note b{ color: var(--text); }
+
+  @media (prefers-reduced-motion: reduce){
+    .led.running{ animation:none; }
+    .readout .cursor{ animation:none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Trạm điều khiển</div>
+    <h1>Bảng điều khiển tự động</h1>
+    <p class="sub">Bấm nút để kích hoạt GitHub Actions tương ứng. Bot Zalo sẽ báo kết quả về khung chat khi chạy xong.</p>
+  </header>
+
+  <div class="panel-card" style="margin-bottom:22px;">
+    <div class="card-top" style="margin-bottom:10px;">
+      <div class="card-id">
+        <div class="icon-box">🔑</div>
+        <div>
+          <div class="card-title">Xác thực</div>
+          <div class="card-desc">Nhập PIN đã đặt trong Cloudflare Worker</div>
+        </div>
+      </div>
+    </div>
+    <input type="password" id="pin-input" placeholder="Nhập PIN..." inputmode="numeric"
+      style="width:100%; padding:10px 12px; background:#10130F; border:1px solid var(--bezel); border-radius:4px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:14px;">
+  </div>
+
+  <!-- App 1: Lịch cúp điện -->
+  <div class="panel-card">
+    <div class="card-top">
+      <div class="card-id">
+        <div class="icon-box">⚡</div>
+        <div>
+          <div class="card-title">Lịch cúp điện</div>
+          <div class="card-desc">Kiểm tra lịch cúp điện khu vực hôm nay</div>
+        </div>
+      </div>
+      <div class="led idle" id="led-dien"></div>
+    </div>
+    <div class="readout" id="readout-dien">
+      <span class="dim">Sẵn sàng. Chưa chạy lần nào trong phiên này.</span>
+    </div>
+    <button class="run-btn" onclick="runApp('dien')" id="btn-dien">
+      <span class="bolt">▶</span> Chạy kiểm tra ngay
+    </button>
+  </div>
+
+  <!-- App 2: Lịch nhắc -->
+  <div class="panel-card">
+    <div class="card-top">
+      <div class="card-id">
+        <div class="icon-box">🔔</div>
+        <div>
+          <div class="card-title">Lịch nhắc</div>
+          <div class="card-desc">Kiểm tra lịch cần nhắc hôm nay</div>
+        </div>
+      </div>
+      <div class="led idle" id="led-lich-nhac"></div>
+    </div>
+    <div class="readout" id="readout-lich-nhac">
+      <span class="dim">Sẵn sàng. Chưa chạy lần nào trong phiên này.</span>
+    </div>
+    <button class="run-btn" onclick="runApp('lich-nhac')" id="btn-lich-nhac">
+      <span class="bolt">▶</span> Kiểm tra ngay
+    </button>
+  </div>
+
+  <!-- App 3: Điểm danh Genshin -->
+  <div class="panel-card">
+    <div class="card-top">
+      <div class="card-id">
+        <div class="icon-box">🎮</div>
+        <div>
+          <div class="card-title">Điểm danh Genshin</div>
+          <div class="card-desc">Chạy điểm danh HoYoLAB hằng ngày</div>
+        </div>
+      </div>
+      <div class="led idle" id="led-genshin-all"></div>
+    </div>
+    <div class="readout" id="readout-genshin">
+      <span class="dim">Sẵn sàng. Chưa chạy lần nào trong phiên này.</span>
+    </div>
+    <button class="run-btn" onclick="runApp('genshin-all')" id="btn-genshin-all">
+      <span class="bolt">▶</span> Chạy toàn bộ (điểm danh + code + notes)
+    </button>
+
+    <button class="expand-toggle" id="toggle-genshin" onclick="toggleSub()">
+      <span class="chevron">▾</span> <span id="toggle-label">Xem từng thông báo riêng</span>
+    </button>
+    <div class="sub-panel" id="sub-panel">
+      <div class="sub-list">
+        <div class="sub-row">
+          <div class="led idle" id="led-genshin-checkin"></div>
+          <div class="sub-info">
+            <div class="sub-title">Chỉ điểm danh</div>
+            <div class="sub-desc">Điểm danh HoYoLAB, cảnh báo nếu thất bại</div>
+          </div>
+          <button class="sub-run" onclick="runApp('genshin-checkin')" id="btn-genshin-checkin">Chạy</button>
+        </div>
+        <div class="sub-row">
+          <div class="led idle" id="led-genshin-code"></div>
+          <div class="sub-info">
+            <div class="sub-title">Chỉ kiểm tra mã redeem</div>
+            <div class="sub-desc">Tìm mã code mới, gửi link nhận qua Zalo</div>
+          </div>
+          <button class="sub-run" onclick="runApp('genshin-code')" id="btn-genshin-code">Chạy</button>
+        </div>
+        <div class="sub-row">
+          <div class="led idle" id="led-genshin-notes"></div>
+          <div class="sub-info">
+            <div class="sub-title">Chỉ kiểm tra Real-Time Notes</div>
+            <div class="sub-desc">Resin, thám hiểm, realm currency...</div>
+          </div>
+          <button class="sub-run" onclick="runApp('genshin-notes')" id="btn-genshin-notes">Chạy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>Cách hoạt động:</b> mỗi nút gọi Cloudflare Worker (giữ GitHub Token an toàn) → Worker xác thực PIN → kích hoạt <code>workflow_dispatch</code> đúng repo/workflow tương ứng → Actions chạy xong tự gửi kết quả qua Zalo Bot. Cần điền đúng <code>WORKER_URL</code> trong code trước khi dùng — xem ghi chú đầu file <code>worker.js</code>.
+  </div>
+
+</div>
+
+<script>
+// ⚠️ SỬA lại đúng URL Worker của bạn sau khi deploy (xem worker.js để biết cách deploy)
+const WORKER_URL = "https://zalobot.thean123agvn.workers.dev/";
+
+// readout dùng chung cho các nút con của Genshin (hiện kết quả lên thẻ chính)
+const READOUT_MAP = {
+  "dien": "readout-dien",
+  "lich-nhac": "readout-lich-nhac",
+  "genshin-all": "readout-genshin",
+  "genshin-checkin": "readout-genshin",
+  "genshin-code": "readout-genshin",
+  "genshin-notes": "readout-genshin",
+};
+
+function toggleSub(){
+  const toggle = document.getElementById('toggle-genshin');
+  const panel = document.getElementById('sub-panel');
+  const label = document.getElementById('toggle-label');
+  const isOpen = panel.classList.toggle('open');
+  toggle.classList.toggle('open', isOpen);
+  label.textContent = isOpen ? 'Ẩn danh sách' : 'Xem từng thông báo riêng';
+}
+
+async function runApp(key){
+  const btn = document.getElementById(`btn-${key}`);
+  const led = document.getElementById(`led-${key}`);
+  const readout = document.getElementById(READOUT_MAP[key]);
+  const pin = document.getElementById('pin-input').value.trim();
+  const time = () => new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+
+  if (!pin){
+    readout.innerHTML = `<span style="color:var(--led-red)">⚠ Vui lòng nhập PIN ở trên trước.</span>`;
+    document.getElementById('pin-input').focus();
+    return;
+  }
+
+  if (WORKER_URL.includes("TEN-CUA-BAN")){
+    readout.innerHTML = `<span style="color:var(--led-red)">⚠ Chưa cấu hình WORKER_URL trong code — xem hướng dẫn trong worker.js.</span>`;
+    return;
+  }
+
+  btn.disabled = true;
+  led.className = 'led running';
+  readout.innerHTML = `<span class="dim">[${time()}]</span> Đang gửi yêu cầu tới GitHub Actions...<span class="cursor"></span>`;
+
+  try {
+    const resp = await fetch(WORKER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ app: key, pin }),
+    });
+    const data = await resp.json();
+
+    if (data.ok) {
+      led.className = 'led ok';
+      readout.innerHTML = `<span class="dim">[${time()}]</span> ✓ ${data.message || 'Đã kích hoạt thành công.'}<br><span class="dim">Chờ Zalo Bot báo kết quả trong ít phút.</span>`;
+    } else {
+      led.className = 'led';
+      led.style.background = 'var(--led-red)';
+      readout.innerHTML = `<span class="dim">[${time()}]</span> <span style="color:var(--led-red)">✗ Lỗi: ${data.error || 'Không rõ nguyên nhân'}</span>`;
+    }
+  } catch (err) {
+    led.className = 'led';
+    led.style.background = 'var(--led-red)';
+    readout.innerHTML = `<span class="dim">[${time()}]</span> <span style="color:var(--led-red)">✗ Không kết nối được tới Worker. Kiểm tra WORKER_URL hoặc mạng.</span>`;
+  }
+
+  btn.disabled = false;
+}
+</script>
+</body>
+</html>
